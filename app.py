@@ -100,10 +100,10 @@ def login():
         
         if len(query) != 0:
             
-            if bcrypt.checkpw(password.encode(), query[0]['Password'].encode()):
+            if bcrypt.checkpw(password.encode(), query[0]['password'].encode()):
                 session.clear()
                 session.permanent = True
-                session["username"] = query[0]["Username"]
+                session["username"] = query[0]["username"]
                 if query[0]["role"] == "admin":
                     session["admin"] = 1
                 else:
@@ -186,7 +186,7 @@ def manageuser():
     db = get_db()
     
     userList = db.select(
-    "SELECT Username, Name, role FROM NisUsers WHERE is_active = TRUE"
+    "SELECT username AS \"Username\", name AS \"Name\", role AS \"Role\" FROM NisUsers WHERE is_active = TRUE"
 )
 
     filtered_users = [

@@ -19,10 +19,10 @@ class SignUp(FlaskForm):
     Role = SelectField(
         "Role",
         choices=[
-            ("User", "User"),
-            ("Admin", "Admin"),
+            ("user", "User"),
+            ("admin", "Admin"),
         ],
-        validators=[InputRequired(), AnyOf(["User", "Admin"], message="Role can only be User or Admin")]
+        validators=[InputRequired(), AnyOf(["user", "admin"], message="Role can only be User or Admin")]
     )
     Submit = SubmitField(label=('SignUp'))
 

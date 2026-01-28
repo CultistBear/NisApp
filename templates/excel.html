@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Data Entry{% endblock %}
+
+{% block body %}
+
+<div class="container pt-5">
+  <div class="d-flex justify-content-center mb-3">
+    <div style="width: 250px;">
+      <form method="POST" action="{{ url_for('fetchtable') }}">
+        {{ formDate.csrf_token }}
+        <input id="{{ formDate.FetchingDate.id }}" name="{{ formDate.FetchingDate.name }}" type="date" class="form-control soft-input" value="{% if formDate.FetchingDate.data %}{{ formDate.FetchingDate.data }}{% endif %}">
+      </form>
+    </div>
+  </div>
+
+      {% if tableData %}
+        <div class="table-responsive">
+          <table id= "dataTable" class="table table-borderless align-middle mb-0 custom-table">
+            <thead>
+                <tr>
+                    <th class="text-muted fw-semibold px-4 py-3">Type</th>
+                    <th class="text-muted fw-semibold px-4 py-3">Subtype</th>
+                    {% for key, label in columns %}
+                        <th class="text-muted fw-semibold px-4 py-3">{{ label }}</th>
+                    {% endfor %}
+                    <th class="text-muted fw-semibold px-4 py-3">
+                      Delete Row
+                    </th>
+                </tr>
+            </thead>
+          
+            <tbody>
+            {% for type, subtypes in tableData.items() %}
+                {% set ns = namespace(first_type_row=True) %}
+                {% set type_rowspan = subtypes.values() | map('length') | sum %}
+            
+                {% for subtype, rows in subtypes.items() %}
+                    {% for row in rows %}
+                    <tr>
+                        {# TYPE CELL #}
+                        {% if ns.first_type_row %}
+                            <td rowspan="{{ type_rowspan }}" class="soft-input input-sm">
+                                {{ type }}
+                            </td>
+                            {% set ns.first_type_row = False %}
+                        {% endif %}
+                          
+                        {# SUBTYPE CELL #}
+                        {% if loop.first %}
+                            <td rowspan="{{ rows|length }}" class="soft-input input-sm">
+                                {{ subtype }}
+                            </td>
+                        {% endif %}
+                        <input type="hidden" value={{row['id']}} id="row-id">
+                        {# DATA CELLS #}
+                        {% for key, _ in columns %}
+                            <td class="soft-input input-sm" data-column="{{ key }}">{{ row[key] }}</td>
+                        {% endfor %}
+                        <td class="text-center align-middle">
+                          <form  method="POST" action="{{ url_for('deleterow') }}">
+                            {{ formDeleteRow.csrf_token }}
+                            {{formDeleteRow.rowID(value=row['id'])}}
+                            {{formDeleteRow.date}}
+                            {{formDeleteRow.DeleteRow(class_="btn btn-sm btn-danger")}}
+                          </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+            <tr>
+              <td colspan="{{ 3 + columns|length }}" class="text-center align-middle py-3">
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                  <form method="POST" action="{{ url_for('submittable') }}" id="formSubmitTable">
+                    {{ formSubmitTable.csrf_token }}
+                    {{formSubmitTable.rowData}}
+                    {{formSubmitTable.SubmitData(class_="btn btn-purple w-100")}}
+                  </form>
+                  <form method="POST" action="{{ url_for('manageexcel') }}">
+                    {{ form.csrf_token }}
+                    {{form.date}}
+                    {{form.DownloadExcel(class_="btn btn-purple w-100")}}
+                  </form>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-danger text-center fst-italic mb-3">no tableData</p>
+      {% endif %}
+
+
+      {% if message %}
+      <p class="text-success text-center fst-italic mb-3">
+        {{ message }}
+      </p>
+      {% endif %}
+
+      {% if error %}
+      <div class="text-danger text-center fst-italic mb-3">
+        {% if error is string %}
+          {{ error }}
+        {% else %}
+          {% for e in error %}
+            <p class="mb-1">{{ e }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  var fetchDateId = '{{ formDate.FetchingDate.id }}'
+  var tableDataExists = {{ 'true' if tableData else 'false' }};
+  var datePrefilled = "{{ formDate.FetchingDate.data }}" !== "";
+</script>
+<script src="{{ url_for('static', filename='js/excel.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,329 @@
+/* ===============================
+   GLOBAL ANIMATED GRADIENT
+   =============================== */
+
+html {
+  min-height: 100%;
+  background: linear-gradient(
+    -45deg,
+    #a18cd1,
+    #cdb4db,
+    #fbc2eb,
+    #e9a8f2
+  );
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body {
+  background: transparent;
+}
+
+
+/* ===============================
+   LAYOUT HELPERS
+   =============================== */
+
+.center-vertical {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.page-content {
+  padding-top: 7rem; /* fixed navbar offset */
+}
+
+
+/* ===============================
+   NAVBAR
+   =============================== */
+.navbar {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+
+.navbar-inner {
+  max-width: 1200px;   /* same visual weight as before */
+}
+
+.navbar-blur {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 24px rgba(80, 0, 120, 0.12);
+}
+
+
+/* ===============================
+   NAV LINKS
+   =============================== */
+
+.navbar .nav-link.nav-link-custom {
+  padding: 0.85rem 1.9rem; 
+  border-radius: 14px;
+}
+
+
+.nav-link-custom:hover {
+  background: rgba(161, 140, 209, 0.18);
+}
+
+.nav-link-custom.active {
+  background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(161, 140, 209, 0.35);
+
+  /* 👇 this is the key */
+  padding: 0.75rem 1.75rem;
+}
+
+
+
+/* ===============================
+   USER BUTTON / DROPDOWN
+   =============================== */
+
+.user-btn {
+  background: transparent;
+  color: #6b21a8;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.45rem 0.8rem;
+}
+
+.user-btn:hover,
+.user-btn:focus {
+  background: rgba(161, 140, 209, 0.18);
+  color: #6b21a8;
+}
+
+
+/* ===============================
+   CARDS
+   =============================== */
+
+.card-bg {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.shadow-strong {
+  box-shadow:
+    0 10px 30px 6px rgba(80, 0, 120, 0.14),
+    0 1px 6px rgba(80, 0, 120, 0.08);
+}
+
+.login-card {
+  max-width: 520px;
+}
+
+
+/* ===============================
+   INPUTS
+   =============================== */
+
+.form-control {
+  border-radius: 10px;
+}
+
+/* Date input styling */
+input[type="date"] {
+  cursor: pointer;
+}
+
+/* Chrome/Safari/Edge calendar icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Soft Tailwind-like input */
+.soft-input {
+  background-color: #e9ecef !important;
+  border: 2px solid #ced4da !important;
+  color: #495057;
+  padding: 1rem 1.25rem;
+  font-size: 1.05rem;
+  min-height: 48px;
+  box-shadow: none;
+}
+
+.soft-input::placeholder {
+  color: #6c757d;
+}
+
+.soft-input:focus {
+  background-color: #e9ecef;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 0.15rem rgba(168, 85, 247, 0.25);
+  color: #495057;
+}
+
+
+/* ===============================
+   BUTTONS
+   =============================== */
+
+.btn-purple {
+  background-color: #a855f7;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 2.5rem;
+}
+
+.btn-purple:hover,
+.btn-purple:focus {
+  background-color: #9333ea;
+  color: #fff;
+}
+
+.btn-purple.btn-sm {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+
+/* ===============================
+   TYPOGRAPHY HELPERS
+   =============================== */
+
+.text-s {
+  font-size: 0.9rem;
+}
+
+.heading-serif {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin-bottom: 0.6rem;
+}
+
+/* ===============================
+   DATA ENTRY TABLE
+   =============================== */
+
+.custom-table {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.custom-table thead {
+  background: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.custom-table th {
+  font-size: 0.9rem;
+}
+
+.custom-table td {
+  background: transparent;
+}
+
+/* Slightly smaller input inside table */
+.input-sm {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: space-between; /* left, center, right */
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.table-actions button {
+  flex: 1;              /* equal width buttons */
+  max-width: 180px;     /* optional */
+}
+
+
+/* ===============================
+   MOBILE RESPONSIVE
+   =============================== */
+
+/* Mobile navbar adjustments */
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    padding: 1rem 0;
+  }
+  
+  .nav-link-custom {
+    padding: 0.75rem 1rem !important;
+    margin-bottom: 0.25rem;
+  }
+  
+  .navbar-toggler:focus {
+    box-shadow: none;
+  }
+}
+
+/* Mobile table adjustments */
+@media (max-width: 767.98px) {
+  /* Keep table at original size, allow horizontal scroll */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .custom-table {
+    min-width: 600px; /* Ensure table doesn't shrink */
+  }
+  
+  .soft-input {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    min-height: 42px;
+  }
+  
+  .page-content {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  /* Stack table action buttons */
+  .table-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .table-actions button {
+    max-width: 100%;
+  }
+  
+  .btn-purple {
+    padding: 0.6rem 1.5rem;
+  }
+  
+  /* Date input - make entire field open calendar on mobile */
+  input[type="date"] {
+    min-height: 48px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 575.98px) {
+  .card-bg {
+    margin: 0.5rem;
+    padding: 1.25rem !important;
+  }
+  
+  .display-5 {
+    font-size: 1.75rem;
+  }
+  
+  .form-control-lg {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Data Entry{% endblock %}
+
+{% block body %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+      <form method="POST"
+            action="{{ url_for('dataentry') }}"
+            class="mt-5" id="dataentryform">
+
+        {{ form.csrf_token }}
+
+        <!-- TYPE -->
+        <div class="mb-4">
+          <label for="type-select"
+                 class="form-label fw-semibold text-heading">
+            Type
+          </label>
+
+          <select name="{{ form.type.name }}"
+                  id="type-select"
+                  class="form-control soft-input"
+                  required>
+            {% for value, label in form.type.choices %}
+              <option value="{{ value }}"
+                      {% if value == "" %}disabled selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- SUBTYPE -->
+        <div class="mb-4">
+          <label for="subtype-select"
+                 class="form-label fw-semibold text-heading">
+            SubType
+          </label>
+
+          <select name="{{ form.subtype.name }}"
+                  id="subtype-select"
+                  class="form-control soft-input"
+                  required>
+            {% for value, label in form.subtype.choices %}
+              <option value="{{ value }}"
+                      {% if value == "" %}disabled selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- DYNAMIC ROWS -->
+        <div id="main" class="mt-4"></div>
+
+        {{ form.rowData }}
+                <!-- Messages -->
+        {% if message %}
+        <p class="text-success text-center fst-italic mb-3">
+          {{ message }}
+        </p>
+        {% endif %}
+
+        {% if error %}
+        <div class="text-danger text-center fst-italic mb-3">
+          {% if error is string %}
+            {{ error }}
+          {% else %}
+            {% for e in error %}
+              <p class="mb-1">{{ e }}</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const columns = {{ columns | tojson }};
+</script>
+
+<script src="{{ url_for('static', filename='js/dataentry.js') }}"></script>
+{% endblock %}

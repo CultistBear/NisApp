@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Create User{% endblock %}
+
+{% block body %}
+
+  <div class="animated-gradient center-vertical">
+    <div class="card-bg shadow-strong rounded-4 p-4 p-sm-5 w-100"
+         style="max-width: 500px;">
+
+      <h1 class="display-5 fw-light text-center mb-3" style="letter-spacing: 0.05em;">
+        Create User
+      </h1>
+
+      <form method="POST" action="{{ url_for('manageuser') }}">
+        {{ form.csrf_token }}
+
+        <!-- Name -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">
+            Name
+          </label>
+          {{ form.Name(class_="form-control form-control-lg soft-input", placeholder_="Name", required_=True) }}
+        </div>
+
+        <!-- Username -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">
+            Username
+          </label>
+          {{ form.Username(class_="form-control form-control-lg soft-input", placeholder_="Username", required_=True) }}
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">
+            Password
+          </label>
+          {{ form.Password( class_="form-control form-control-lg soft-input", placeholder_="Password", required_=True) }}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">
+            Confirm Password
+          </label>
+          {{ form.Confirm_Password( class_="form-control form-control-lg soft-input", placeholder_="Confirm Password", required_=True) }}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-secondary">
+            Role
+          </label>
+          {{ form.Role( class_="form-control form-control-lg soft-input", required_=True) }}
+        </div>
+
+        <!-- Messages -->
+        {% if message %}
+        <p class="text-success text-center fst-italic mb-3">
+          {{ message }}
+        </p>
+        {% endif %}
+
+        {% if error %}
+        <div class="text-danger text-center fst-italic mb-3">
+          {% if error is string %}
+            {{ error }}
+          {% else %}
+            {% for e in error %}
+              <p class="mb-1">{{ e }}</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Submit -->
+        <div class="d-flex justify-content-center">
+          {{ form.Submit(class_="btn btn-purple btn-lg shadow") }}
+        </div>
+      </form>
+    </div>
+  </div>
+
+{% if userList.data %}
+<div class="d-flex justify-content-center align-items-center pb-5 px-3">
+  <div class="table-responsive mt-4 w-100" style="max-width: 700px;">
+    <div class="table-wrapper">
+      <table class="table table-borderless align-middle mb-0 custom-table">
+        <thead>
+          <tr>
+            {% for col in userList.columns %}
+              <th class="text-muted fw-semibold px-4 py-3">
+                {{ col }}
+              </th>
+            {% endfor %}
+            <th class="text-muted fw-semibold px-4 py-3 text-center">
+              Action
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for user in userList.data %}
+          <tr>
+            {% for col in userList.columns %}
+              <td class="px-4 py-3">
+                <input
+                  type="text"
+                  class="form-control soft-input input-sm"
+                  value="{{ user[col] }}"
+                  readonly
+                >
+              </td>
+            {% endfor %}
+
+            <td class="text-center align-middle px-4 py-3">
+              <form method="POST" action="{{ url_for('delete_user') }}">
+                {{ form1.csrf_token }}
+                {{ form1.Username(value=user["Username"]) }}
+                {{ form1.Delete(class="btn btn-sm btn-danger") }}
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Messages -->
+        {% if message1 %}
+        <br>
+        <p class="text-success text-center fst-italic mb-3">
+          {{ message1 }}
+        </p>
+        {% endif %}
+
+        {% if error1 %}
+        <br>
+        <div class="text-danger text-center fst-italic mb-3">
+          {% if error1 is string %}
+            {{ error1 }}
+          {% else %}
+            {% for e in error1 %}
+              <p class="mb-1">{{ e }}</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock%}

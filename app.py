@@ -83,7 +83,7 @@ for handler in logging.getLogger().handlers:
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
+@limiter.limit("20 per minute")
 def login():
     form = Login()
     db = get_db()

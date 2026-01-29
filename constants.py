@@ -14,7 +14,7 @@ DB_USERNAME = os.environ.get('DB_USERNAME')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
 DATABASE_NAME = os.environ.get('DATABASE_NAME')
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
-DB_PORT = int(os.environ.get('DB_PORT', 5432 if IS_PRODUCTION else 3306))
+DB_PORT = int(os.environ.get('DB_PORT', 5432))
 
 FLASK_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 ADMIN_DEFAULT_PASSWORD = os.environ.get('ADMIN_DEFAULT_PASSWORD')

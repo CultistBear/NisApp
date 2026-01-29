@@ -93,7 +93,7 @@ def render_empty_subtype_slot(ws, start_row, start_col, width, fixed_height):
     return start_row + 1 + 1 + fixed_height
 
 
-def generate_excel(column_map, db_data):
+def generate_excel(column_map, db_data, report_date=None):
     wb = Workbook()
     ws = wb.active
     ws.title = "Expense Register"
@@ -101,13 +101,18 @@ def generate_excel(column_map, db_data):
     for col in range(1, 50):
         ws.column_dimensions[get_column_letter(col)].width = 18
 
+    ws.column_dimensions['A'].width = 3
+
+    if report_date is None:
+        report_date = date.today().strftime('%d-%m-%Y')
+
     merge_and_style(
         ws,
         1,
         2,
         1,
         15,
-        f"Expense Register — {date.today().strftime('%d-%m-%Y')}",
+        f"Expense Register — {report_date}",
         font=BOLD,
         align=LEFT
     )
@@ -166,6 +171,7 @@ def generate_excel(column_map, db_data):
         ws.column_dimensions[get_column_letter(gap_col)].width = GAP_WIDTH
 
     type_subtotal_cells = {type_name: [] for type_name in column_map.keys()}
+    subtype_subtotal_cells = {subtype_name: [] for subtype_name in all_subtypes}
     
     for type_name, subtypes in column_map.items():
         col = type_columns[type_name]
@@ -191,6 +197,7 @@ def generate_excel(column_map, db_data):
                     fixed_height
                 )
                 type_subtotal_cells[type_name].append(subtotal_ref)
+                subtype_subtotal_cells[subtype_name].append(subtotal_ref)
 
     type_total_refs = []
     
@@ -225,8 +232,44 @@ def generate_excel(column_map, db_data):
 
         type_total_refs.append(f"{amount_letter}{totals_row}")
 
+    subtype_totals_col = current_col + 1
+    subtype_total_refs = []
+    
+    for subtype_name in all_subtypes:
+        subtype_row = subtype_start_rows[subtype_name]
+        subtotal_row = subtype_row + 1 + 1 + subtype_max_rows[subtype_name]
+        
+        amount_letter = get_column_letter(subtype_totals_col)
+        
+        subtotal_cells = subtype_subtotal_cells[subtype_name]
+        if subtotal_cells:
+            subtype_formula = f"=SUM({','.join(subtotal_cells)})"
+        else:
+            subtype_formula = 0
+
+        write_cell(
+            ws,
+            subtotal_row,
+            subtype_totals_col,
+            subtype_formula,
+            font=BOLD,
+            align=RIGHT,
+            border=Border(left=THICK, right=THICK, top=THICK, bottom=THICK)
+        )
+
+        write_cell(
+            ws,
+            subtotal_row,
+            subtype_totals_col + 1,
+            f"{subtype_name} TOTAL",
+            font=BOLD,
+            align=LEFT
+        )
+
+        subtype_total_refs.append(f"{amount_letter}{subtotal_row}")
+
     if type_total_refs:
-        grand_total_col = current_col
+        grand_total_col = subtype_totals_col
         grand_total_letter = get_column_letter(grand_total_col)
         
         grand_total_formula = f"=SUM({','.join(type_total_refs)})"

@@ -268,7 +268,8 @@ def manageexcel():
             return redirect(url_for("manageexcel"))
         
         tableData = db.select("SELECT * FROM input WHERE date_for = %s", (formDate.FetchingDate.data,))
-        ws = generate_excel(trim_column_map(COLUMN_MAP, {"date"}), build_db_data(tableData))
+        report_date = datetime.strptime(formDate.FetchingDate.data, "%Y-%m-%d").strftime("%d-%m-%Y")
+        ws = generate_excel(trim_column_map(COLUMN_MAP, {"date"}), build_db_data(tableData), report_date)
         output = BytesIO()
         ws.save(output)
         output.seek(0)

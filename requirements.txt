@@ -5,7 +5,6 @@ flask_wtf==1.2.2
 itsdangerous==2.2.0
 openpyxl==3.1.5
 psycopg2-binary
-PyMySQL==1.1.0
 bcrypt
 WTForms==3.0.1
 gunicorn

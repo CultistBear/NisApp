@@ -11,7 +11,8 @@ from excelHelpers import (
     LEFT,
     RIGHT,
     LEFT_WRAP,
-    THICK
+    THICK,
+    CENTER
 )
 
 
@@ -50,7 +51,7 @@ def render_subtype_table(ws, start_row, start_col, type_name, subtype_name, colu
             if i > 0:
                 write_cell(ws, current_row, start_col + i, value, align=LEFT_WRAP)
             else:
-                write_cell(ws, current_row, start_col + i, value)
+                write_cell(ws, current_row, start_col + i, value, align=CENTER)
         current_row += 1
     
     rows_written = len(rows)

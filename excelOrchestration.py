@@ -10,6 +10,7 @@ from excelHelpers import (
     BOLD,
     LEFT,
     RIGHT,
+    LEFT_WRAP,
     THICK
 )
 
@@ -46,7 +47,10 @@ def render_subtype_table(ws, start_row, start_col, type_name, subtype_name, colu
     data_start_row = current_row
     for row in rows:
         for i, value in enumerate(row):
-            write_cell(ws, current_row, start_col + i, value)
+            if i > 0:
+                write_cell(ws, current_row, start_col + i, value, align=LEFT_WRAP)
+            else:
+                write_cell(ws, current_row, start_col + i, value)
         current_row += 1
     
     rows_written = len(rows)
@@ -292,5 +296,16 @@ def generate_excel(column_map, db_data, report_date=None):
             font=BOLD,
             align=LEFT
         )
+
+    max_data_col = subtype_totals_col + 1
+    used_cols = set()
+    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=max_data_col):
+        for cell in row:
+            if cell.value is not None and cell.value != "":
+                used_cols.add(cell.column)
+    
+    for col in range(1, max_data_col + 1):
+        if col not in used_cols:
+            ws.column_dimensions[get_column_letter(col)].width = 3
 
     return wb

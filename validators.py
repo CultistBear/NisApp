@@ -54,4 +54,8 @@ def validate_table_data(table_data, allowed_columns):
         if len(receipt) > 100:
             raise ValidationError(f"Row {row_num}: Receipts too long")
 
+        import re
+        if not re.match(r'^[A-Za-z0-9\s\-\.\,\(\)\/\\&@]+$', receipt):
+            raise ValidationError(f"Row {row_num}: Receipts contains invalid characters")
+
     return True

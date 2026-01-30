@@ -20,6 +20,9 @@ FLASK_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY')
 ADMIN_DEFAULT_PASSWORD = os.environ.get('ADMIN_DEFAULT_PASSWORD')
 ID_FERNET_KEY = os.environ.get('ID_FERNET_KEY')
 
+_client_names_raw = os.environ.get('CLIENT_NAMES', '')
+CLIENT_NAMES = [name.strip() for name in _client_names_raw.split(';;;') if name.strip()]
+
 _required = ['DB_USERNAME', 'DB_PASSWORD', 'DATABASE_NAME', 'FLASK_SECRET_KEY', 'ID_FERNET_KEY']
 _missing = [var for var in _required if not os.environ.get(var)]
 if _missing and not DATABASE_URL:

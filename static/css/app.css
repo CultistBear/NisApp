@@ -327,3 +327,53 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-size: 1rem;
   }
 }
+
+/* ===============================
+   CUSTOM AUTOCOMPLETE DROPDOWN
+   =============================== */
+
+.autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-dropdown {
+  position: fixed;
+  min-width: 300px;
+  max-height: 250px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid rgba(161, 140, 209, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(80, 0, 120, 0.15);
+  z-index: 1000;
+  display: none;
+}
+
+.autocomplete-dropdown.show {
+  display: block;
+}
+
+.autocomplete-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+  border-bottom: 1px solid rgba(161, 140, 209, 0.1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background: linear-gradient(90deg, rgba(161, 140, 209, 0.15), rgba(251, 194, 235, 0.15));
+}
+
+.autocomplete-item.selected {
+  background: linear-gradient(90deg, rgba(161, 140, 209, 0.25), rgba(251, 194, 235, 0.25));
+}

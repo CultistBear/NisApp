@@ -8,6 +8,7 @@ BOLD = Font(bold=True)
 LEFT = Alignment(horizontal="left", vertical="center")
 RIGHT = Alignment(horizontal="right", vertical="center")
 CENTER = Alignment(horizontal="center", vertical="center")
+LEFT_WRAP = Alignment(horizontal="left", vertical="center", wrap_text=True)
 
 NO_BORDER = Border()
 

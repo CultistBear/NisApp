@@ -86,7 +86,8 @@
 
 {% block scripts %}
 <script>
-  const columns = {{ columns | tojson }};
+  const columns = {{ columns | tojson | safe }};
+  const clientNames = {{ client_names | tojson | safe }};
 </script>
 
 <script src="{{ url_for('static', filename='js/dataentry.js') }}"></script>

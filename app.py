@@ -5,7 +5,7 @@ from itsdangerous import URLSafeSerializer
 from forms import SignUp, Login, DataEntryForm, UserEdit, FetchExcel, FetchTableData, SubmitData, DeleteRow
 from flask_wtf.csrf import CSRFProtect
 from db import get_db, close_db
-from constants import FLASK_SECRET_KEY, CURRENT_WORKING_DIRECTORY, COLUMN_MAP, SAFE_HEADERS, ADMIN_ENDPOINTS, DISPLAY_COLUMNS, ID_FERNET_KEY, IS_PRODUCTION
+from constants import FLASK_SECRET_KEY, CURRENT_WORKING_DIRECTORY, COLUMN_MAP, SAFE_HEADERS, ADMIN_ENDPOINTS, DISPLAY_COLUMNS, ID_FERNET_KEY, IS_PRODUCTION, CLIENT_NAMES
 from datetime import datetime, timedelta
 from excelOrchestration import generate_excel
 import bcrypt
@@ -19,7 +19,6 @@ from flask_limiter.util import get_remote_address
 import re
 
 app = Flask(__name__)
-
 app.config.update(
     SECRET_KEY = FLASK_SECRET_KEY,
     SESSION_COOKIE_HTTPONLY=True,
@@ -58,6 +57,14 @@ logger.addHandler(file_handler)
 
 werkzeug_logger = logging.getLogger('werkzeug')
 werkzeug_logger.disabled = True 
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
     
 @app.before_request
 def pre_request():
@@ -177,7 +184,7 @@ def dataentry():
 
     error = session.pop("error", None)
     message = session.pop("message", None)
-    return render_template("dataentry.html", form=form, columns=COLUMN_MAP, error=error, message=message)
+    return render_template("dataentry.html", form=form, columns=COLUMN_MAP, error=error, message=message, client_names=CLIENT_NAMES)
     
 @app.route("/manageuser", methods = ["GET", "POST"])
 def manageuser():

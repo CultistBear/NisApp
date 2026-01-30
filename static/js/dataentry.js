@@ -14,6 +14,106 @@ let tableData = {
   data: []
 };
 
+/* ------------------ CUSTOM AUTOCOMPLETE ------------------ */
+
+let activeDropdown = null;
+
+function setupAutocomplete(input) {
+  if (typeof clientNames === "undefined" || clientNames.length === 0) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "autocomplete-wrapper";
+  input.parentNode.insertBefore(wrapper, input);
+  wrapper.appendChild(input);
+
+  const dropdown = document.createElement("div");
+  dropdown.className = "autocomplete-dropdown";
+  wrapper.appendChild(dropdown);
+
+  let selectedIndex = -1;
+
+  input.addEventListener("input", () => {
+    const val = input.value.toLowerCase();
+    dropdown.innerHTML = "";
+    selectedIndex = -1;
+
+    if (!val) {
+      dropdown.classList.remove("show");
+      return;
+    }
+
+    const matches = clientNames.filter(name => 
+      name.toLowerCase().includes(val)
+    ).slice(0, 10);
+
+    if (matches.length === 0) {
+      dropdown.classList.remove("show");
+      return;
+    }
+
+    matches.forEach((name, idx) => {
+      const item = document.createElement("div");
+      item.className = "autocomplete-item";
+      item.textContent = name;
+      item.addEventListener("click", () => {
+        input.value = name;
+        dropdown.classList.remove("show");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      item.addEventListener("mouseenter", () => {
+        selectedIndex = idx;
+        updateSelection(dropdown, selectedIndex);
+      });
+      dropdown.appendChild(item);
+    });
+
+    const rect = input.getBoundingClientRect();
+    dropdown.style.top = (rect.bottom + 4) + "px";
+    dropdown.style.left = rect.left + "px";
+    dropdown.style.width = Math.max(rect.width, 300) + "px";
+
+    dropdown.classList.add("show");
+    activeDropdown = dropdown;
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = dropdown.querySelectorAll(".autocomplete-item");
+    if (!items.length) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+      updateSelection(dropdown, selectedIndex);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+      updateSelection(dropdown, selectedIndex);
+    } else if (e.key === "Enter" && selectedIndex >= 0) {
+      e.preventDefault();
+      input.value = items[selectedIndex].textContent;
+      dropdown.classList.remove("show");
+    } else if (e.key === "Escape") {
+      dropdown.classList.remove("show");
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(() => dropdown.classList.remove("show"), 150);
+  });
+}
+
+function updateSelection(dropdown, index) {
+  dropdown.querySelectorAll(".autocomplete-item").forEach((item, i) => {
+    item.classList.toggle("selected", i === index);
+  });
+}
+
+document.addEventListener("click", (e) => {
+  if (activeDropdown && !e.target.closest(".autocomplete-wrapper")) {
+    activeDropdown.classList.remove("show");
+  }
+});
+
 /* ------------------ HELPERS ------------------ */
 
 function todayISO() {
@@ -159,6 +259,11 @@ function renderBody() {
 
       td.appendChild(input);
       tr.appendChild(td);
+
+      if (col.name.toLowerCase() === "receipts") {
+        input.setAttribute("autocomplete", "off");
+        setTimeout(() => setupAutocomplete(input), 0);
+      }
     });
 
     const actionTd = document.createElement("td");

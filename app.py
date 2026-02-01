@@ -75,28 +75,33 @@ def pre_request():
         return
     
     headers = ", ".join(f"{k}: {v}" for k, v in request.headers.items() if k in SAFE_HEADERS)
-    logger.info(f"New request from IP: {request.remote_addr}, Headers: {headers}, Method: {request.method}, Path: {request.path}\n")
+    logger.info(f"New request from IP: {get_client_ip()}, Headers: {headers}, Method: {request.method}, Path: {request.path}\n")
     
     if session.get("username", None) and session.get("username", None) in pending_logout:
         username_to_logout = session.get("username")
         pending_logout.discard(username_to_logout)
         session.clear()
         session["message"] = "Your account was updated by an administrator. Please log in again."
-        logger.info(f"User {username_to_logout} force-logged out due to account changes from IP: {request.remote_addr}")
+        logger.info(f"User {username_to_logout} force-logged out due to account changes from IP: {get_client_ip()}")
         return redirect(url_for("login"))
     if session.get("username", None) is None and request.endpoint not in ["login", "static", 'logout']:
-        logger.info(f"Redirecting to login from IP: {request.remote_addr}")
+        logger.info(f"Redirecting to login from IP: {get_client_ip()}")
         return redirect(url_for("login"))
     if session.get("username", None) is not None and request.endpoint in ["login"]:
-        logger.info(f"User {session.get('username')} already logged in, redirecting to dataentry from IP: {request.remote_addr}")
+        logger.info(f"User {session.get('username')} already logged in, redirecting to dataentry from IP: {get_client_ip()}")
         return redirect(url_for("dataentry"))
     if session.get("admin", None) != 1 and request.endpoint in ADMIN_ENDPOINTS:
-        logger.warning(f"User {session.get('username', None)} Tried to log into admin endpoint {request.endpoint}, redirecting to dataentry from IP: {request.remote_addr}")
+        logger.warning(f"User {session.get('username', None)} Tried to log into admin endpoint {request.endpoint}, redirecting to dataentry from IP: {get_client_ip()}")
         return redirect(url_for("dataentry"))
 
 for handler in logging.getLogger().handlers:
     if isinstance(handler, logging.FileHandler):
         print(f"Logs are being saved to: {handler.baseFilename}")
+
+def get_client_ip():
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    return request.remote_addr
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
@@ -104,11 +109,11 @@ for handler in logging.getLogger().handlers:
 def login():
     form = Login()
     db = get_db()
-    logger.info(f"Login form requested from IP: {request.remote_addr}")
+    logger.info(f"Login form requested from IP: {get_client_ip()}")
     if form.validate_on_submit():
         username = form.Username.data
         password = form.Password.data
-        logger.info(f"Attempting login for {username} from IP: {request.remote_addr}")
+        logger.info(f"Attempting login for {username} from IP: {get_client_ip()}")
         
         query = db.select(
     "SELECT * FROM NisUsers WHERE Username = %s AND is_active = TRUE LIMIT 1",
@@ -129,17 +134,17 @@ def login():
                 
                 pending_logout.discard(query[0]["username"])
                 
-                logger.info(f"User {session['username']} logged in successfully from IP: {request.remote_addr}")
+                logger.info(f"User {session['username']} logged in successfully from IP: {get_client_ip()}")
                 return redirect(url_for('dataentry'))
             
             else:
                 session["error"] = 'Invalid Username/Password'
-                logging.warning(f"Invalid password attempt for {username} from IP: {request.remote_addr}")
+                logging.warning(f"Invalid password attempt for {username} from IP: {get_client_ip()}")
                 return redirect(url_for("login"))
             
         session["error"] = 'Invalid Username/Password'
         
-        logging.warning(f"Invalid username attempt for {username} from IP: {request.remote_addr}")
+        logging.warning(f"Invalid username attempt for {username} from IP: {get_client_ip()}")
         return redirect(url_for('login'))
 
     error = session.pop("error", None)
@@ -149,7 +154,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    logger.info(f"User {session.get('username')} logged out from IP: {request.remote_addr}")
+    logger.info(f"User {session.get('username')} logged out from IP: {get_client_ip()}")
     session.clear()
     session["message"] = "Successfully Logged Out"
     return redirect(url_for("login"))
@@ -227,7 +232,7 @@ def manageuser():
             "data": []
         }
     
-    logger.info(f"Create User accessed by {session.get('username')} from IP: {request.remote_addr}")
+    logger.info(f"Create User accessed by {session.get('username')} from IP: {get_client_ip()}")
     if form.is_submitted():
         if form.validate_on_submit():
             if len(db.select("SELECT * FROM NisUsers WHERE Username = %s LIMIT 1",(form.Username.data,)))!= 0:
@@ -258,7 +263,7 @@ def manageuser():
 @app.route("/delete_user", methods = ["POST"])
 def delete_user():
     if session.get("admin") != 1:
-        logger.warning(f"Unauthorized delete_user attempt by {session.get('username', 'unknown')} from IP: {request.remote_addr}")
+        logger.warning(f"Unauthorized delete_user attempt by {session.get('username', 'unknown')} from IP: {get_client_ip()}")
         return redirect(url_for("dataentry"))
     
     form = UserEdit()
@@ -285,7 +290,7 @@ def delete_user():
 @app.route("/edit_user", methods = ["POST"])
 def edit_user():
     if session.get("admin") != 1:
-        logger.warning(f"Unauthorized edit_user attempt by {session.get('username', 'unknown')} from IP: {request.remote_addr}")
+        logger.warning(f"Unauthorized edit_user attempt by {session.get('username', 'unknown')} from IP: {get_client_ip()}")
         return redirect(url_for("dataentry"))
     
     form = UserFullEdit()
@@ -317,7 +322,7 @@ def edit_user():
                     (new_name, new_role, original_username)
                 )
             db.commit()
-            logger.info(f"User {original_username} updated by {session.get('username')} from IP: {request.remote_addr}")
+            logger.info(f"User {original_username} updated by {session.get('username')} from IP: {get_client_ip()}")
             session["message1"] = f"User {original_username} updated successfully."
             if original_username != session.get("username"):
                 pending_logout.add(original_username)
@@ -412,7 +417,7 @@ def fetchtable():
 @app.route("/deleterow", methods = ["POST"])
 def deleterow():
     if session.get("admin") != 1:
-        logger.warning(f"Unauthorized deleterow attempt by {session.get('username', 'unknown')} from IP: {request.remote_addr}")
+        logger.warning(f"Unauthorized deleterow attempt by {session.get('username', 'unknown')} from IP: {get_client_ip()}")
         session["error"] = "Unauthorized action"
         return redirect(url_for("manageexcel"))
     
@@ -441,7 +446,7 @@ def deleterow():
 @app.route("/submittable", methods = ["POST"])
 def submittable():
     if session.get("admin") != 1:
-        logger.warning(f"Unauthorized submittable attempt by {session.get('username', 'unknown')} from IP: {request.remote_addr}")
+        logger.warning(f"Unauthorized submittable attempt by {session.get('username', 'unknown')} from IP: {get_client_ip()}")
         session["error"] = "Unauthorized action"
         return redirect(url_for("manageexcel"))
     

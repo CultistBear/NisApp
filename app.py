@@ -110,20 +110,6 @@ def get_client_ip():
         return ips[0]
     return request.remote_addr
 
-@app.route('/debug-headers')
-def debug_headers():
-    xff = request.headers.get('X-Forwarded-For', '')
-    ips = [ip.strip() for ip in xff.split(',')] if xff else []
-    return {
-        'all_headers': dict(request.headers),
-        'X-Forwarded-For': xff,
-        'X-Forwarded-For_split': ips,
-        'True-Client-IP': request.headers.get('True-Client-IP'),
-        'CF-Connecting-IP': request.headers.get('CF-Connecting-IP'),
-        'remote_addr': request.remote_addr,
-        'detected_ip': get_client_ip()
-    }
-
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("20 per minute")

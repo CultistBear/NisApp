@@ -99,9 +99,30 @@ for handler in logging.getLogger().handlers:
         print(f"Logs are being saved to: {handler.baseFilename}")
 
 def get_client_ip():
+    if request.headers.get('True-Client-IP'):
+        return request.headers.get('True-Client-IP')
+    if request.headers.get('CF-Connecting-IP'):
+        return request.headers.get('CF-Connecting-IP')
     if request.headers.get('X-Forwarded-For'):
-        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+        ips = [ip.strip() for ip in request.headers.get('X-Forwarded-For').split(',')]
+        if len(ips) >= 2:
+            return ips[-2]
+        return ips[0]
     return request.remote_addr
+
+@app.route('/debug-headers')
+def debug_headers():
+    xff = request.headers.get('X-Forwarded-For', '')
+    ips = [ip.strip() for ip in xff.split(',')] if xff else []
+    return {
+        'all_headers': dict(request.headers),
+        'X-Forwarded-For': xff,
+        'X-Forwarded-For_split': ips,
+        'True-Client-IP': request.headers.get('True-Client-IP'),
+        'CF-Connecting-IP': request.headers.get('CF-Connecting-IP'),
+        'remote_addr': request.remote_addr,
+        'detected_ip': get_client_ip()
+    }
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
@@ -504,6 +525,8 @@ def submittable():
 
 @app.errorhandler(404)
 def not_found(e):
+    if request.path == '/favicon.ico':
+        return '', 204
     user = session.get("username", "anonymous")
     logging.warning(f"404 error encountered by {user} at {request.url}")
     return render_template("404.html")

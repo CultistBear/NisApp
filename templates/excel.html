@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Data Entry{% endblock %}
+{% block title %}Excel Management{% endblock %}
 
 {% block body %}
 
@@ -24,9 +24,11 @@
                     {% for key, label in columns %}
                         <th class="text-muted fw-semibold px-4 py-3">{{ label }}</th>
                     {% endfor %}
+                    {% if is_admin %}
                     <th class="text-muted fw-semibold px-4 py-3">
                       Delete Row
                     </th>
+                    {% endif %}
                 </tr>
             </thead>
           
@@ -53,10 +55,11 @@
                             </td>
                         {% endif %}
                         <input type="hidden" value={{row['id']}} id="row-id">
-                        {# DATA CELLS #}
+                        {# DATA CELLS - editable only for admin #}
                         {% for key, _ in columns %}
-                            <td class="soft-input input-sm" data-column="{{ key }}">{{ row[key] }}</td>
+                            <td class="soft-input input-sm {% if not is_admin %}readonly-cell{% endif %}" data-column="{{ key }}" {% if not is_admin %}data-readonly="true"{% endif %}>{{ row[key] }}</td>
                         {% endfor %}
+                        {% if is_admin %}
                         <td class="text-center align-middle">
                           <form  method="POST" action="{{ url_for('deleterow') }}">
                             {{ formDeleteRow.csrf_token }}
@@ -65,18 +68,21 @@
                             {{formDeleteRow.DeleteRow(class_="btn btn-sm btn-danger")}}
                           </form>
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 {% endfor %}
             {% endfor %}
             <tr>
-              <td colspan="{{ 3 + columns|length }}" class="text-center align-middle py-3">
+              <td colspan="{{ (4 if is_admin else 3) + columns|length }}" class="text-center align-middle py-3">
                 <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
+                  {% if is_admin %}
                   <form method="POST" action="{{ url_for('submittable') }}" id="formSubmitTable">
                     {{ formSubmitTable.csrf_token }}
                     {{formSubmitTable.rowData}}
                     {{formSubmitTable.SubmitData(class_="btn btn-purple w-100")}}
                   </form>
+                  {% endif %}
                   <form method="POST" action="{{ url_for('manageexcel') }}">
                     {{ form.csrf_token }}
                     {{form.date}}
@@ -119,6 +125,7 @@
   var fetchDateId = '{{ formDate.FetchingDate.id }}'
   var tableDataExists = {{ 'true' if tableData else 'false' }};
   var datePrefilled = "{{ formDate.FetchingDate.data }}" !== "";
+  var isAdmin = {{ 'true' if is_admin else 'false' }};
 </script>
 <script src="{{ url_for('static', filename='js/excel.js') }}"></script>
 {% endblock %}

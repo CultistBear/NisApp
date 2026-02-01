@@ -84,7 +84,7 @@
 
 {% if userList.data %}
 <div class="d-flex justify-content-center align-items-center pb-5 px-3">
-  <div class="table-responsive mt-4 w-100" style="max-width: 700px;">
+  <div class="table-responsive mt-4 w-100" style="max-width: 800px;">
     <div class="table-wrapper">
       <table class="table table-borderless align-middle mb-0 custom-table">
         <thead>
@@ -95,7 +95,7 @@
               </th>
             {% endfor %}
             <th class="text-muted fw-semibold px-4 py-3 text-center">
-              Action
+              Actions
             </th>
           </tr>
         </thead>
@@ -115,13 +115,67 @@
             {% endfor %}
 
             <td class="text-center align-middle px-4 py-3">
-              <form method="POST" action="{{ url_for('delete_user') }}">
-                {{ form1.csrf_token }}
-                {{ form1.Username(value=user["Username"]) }}
-                {{ form1.Delete(class="btn btn-sm btn-danger") }}
-              </form>
+              <div class="d-flex justify-content-center gap-2">
+                <!-- Edit Button -->
+                <button type="button" class="btn btn-sm btn-purple" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editModal{{ loop.index }}"
+                        title="Edit User">
+                  ✎
+                </button>
+                <!-- Delete Form -->
+                <form method="POST" action="{{ url_for('delete_user') }}" class="d-inline">
+                  {{ form1.csrf_token }}
+                  {{ form1.Username(value=user["Username"]) }}
+                  {{ form1.Delete(class="btn btn-sm btn-danger", title="Deactivate User") }}
+                </form>
+              </div>
             </td>
           </tr>
+          
+          <!-- Edit Modal for this user -->
+          <div class="modal fade" id="editModal{{ loop.index }}" tabindex="-1" aria-labelledby="editModalLabel{{ loop.index }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content card-bg rounded-4">
+                <div class="modal-header border-0">
+                  <h5 class="modal-title" id="editModalLabel{{ loop.index }}">Edit User: {{ user["Username"] }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{{ url_for('edit_user') }}">
+                  {{ formEdit.csrf_token }}
+                  {{ formEdit.OriginalUsername(value=user["Username"]) }}
+                  <div class="modal-body">
+                    <!-- Name -->
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold text-secondary">Name (Type)</label>
+                      {{ formEdit.Name(class_="form-control soft-input", value=user["Name"], placeholder="e.g., METRO, OFFICE, TOUR") }}
+                      <small class="text-muted">This determines which data type the user can access</small>
+                    </div>
+                    
+                    <!-- Role -->
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold text-secondary">Role</label>
+                      <select name="{{ formEdit.Role.name }}" class="form-control soft-input">
+                        <option value="user" {% if user["Role"] == "user" %}selected{% endif %}>User</option>
+                        <option value="admin" {% if user["Role"] == "admin" %}selected{% endif %}>Admin</option>
+                      </select>
+                    </div>
+                    
+                    <!-- New Password -->
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold text-secondary">New Password</label>
+                      {{ formEdit.NewPassword(class_="form-control soft-input", placeholder="Leave blank to keep current password") }}
+                      <small class="text-muted">Minimum 8 characters if changing</small>
+                    </div>
+                  </div>
+                  <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ formEdit.SaveEdit(class_="btn btn-purple") }}
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
           {% endfor %}
         </tbody>
       </table>

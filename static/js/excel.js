@@ -24,11 +24,15 @@ const EDITABLE_COLUMNS = new Set(["amount", "receipts", ""]);
 
 if (table){
 table.addEventListener("click", (e) => {
+  if (typeof isAdmin !== 'undefined' && !isAdmin) return;
+  
   const td = e.target.closest("td");
   if (!td) return;
 
   const column = td.dataset.column;
-  if (!column) return; // Not a data cell
+  if (!column) return;
+
+  if (td.dataset.readonly === "true") return;
 
   if (!EDITABLE_COLUMNS.has(column)) return;
   if (td.classList.contains("editing")) return;

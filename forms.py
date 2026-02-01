@@ -82,6 +82,28 @@ class UserEdit(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(UserEdit, self).__init__(*args, **kwargs)
         logging.info("UserEdit form initialized")
+
+class UserFullEdit(FlaskForm):
+    OriginalUsername = HiddenField(validators=[InputRequired(), Length(min=5, max=16)])
+    Name = StringField('Name', validators=[InputRequired(), Length(min=3, max=100, message="Name cannot be less than 3 characters and more than 100 characters")])
+    Role = SelectField(
+        "Role",
+        choices=[
+            ("user", "User"),
+            ("admin", "Admin"),
+        ],
+        validators=[InputRequired(), AnyOf(["user", "admin"], message="Role can only be User or Admin")]
+    )
+    NewPassword = PasswordField(
+        "New Password (leave blank to keep current)", 
+        validators=[Length(min=0, max=30, message="Password cannot be more than 30 characters")],
+        render_kw={"autocomplete": "new-password"}
+    )
+    SaveEdit = SubmitField("Save Changes")
+
+    def __init__(self, *args, **kwargs):
+        super(UserFullEdit, self).__init__(*args, **kwargs)
+        logging.info("UserFullEdit form initialized")
         
 class FetchExcel(FlaskForm):
     date = HiddenField(id="downloadDate", validators=[InputRequired()])

@@ -33,7 +33,7 @@ if isinstance(ID_FERNET_KEY, str):
 
 CURRENT_WORKING_DIRECTORY = pathlib.Path(__file__).parent.resolve()
 SAFE_HEADERS = ["User-Agent", "Accept", "Referer"]
-ADMIN_ENDPOINTS = ["manageuser", "manageexcel", "delete_user", "fetchtable", "submittable", "deleterow"]
+ADMIN_ENDPOINTS = ["manageuser", "delete_user", "edit_user", "submittable", "deleterow"]
 
 COLUMN_MAP = {
     "METRO": {

@@ -73,6 +73,7 @@
              User Management
           </a>
         </li>
+        {% endif %}
         <li class="nav-item">
           <a class="nav-link nav-link-custom
              {% if request.endpoint == 'manageexcel' %}active{% endif %}"
@@ -80,7 +81,6 @@
              Excel Management
           </a>
         </li>
-        {% endif %}
       </ul>
     </div>
 

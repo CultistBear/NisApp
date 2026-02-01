@@ -115,6 +115,11 @@ body {
   background: rgba(255, 255, 255, 0.6);
 }
 
+/* Modal specific styling - more opaque background */
+.modal-content.card-bg {
+  background: rgba(255, 255, 255, 0.90);
+}
+
 .shadow-strong {
   box-shadow:
     0 10px 30px 6px rgba(80, 0, 120, 0.14),
@@ -235,6 +240,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .input-sm {
   padding: 0.55rem 0.75rem;
   font-size: 0.9rem;
+}
+
+/* Readonly cell styling for non-admin users */
+.readonly-cell {
+  cursor: default;
+  user-select: text;
+  background-color: rgba(233, 236, 239, 0.3) !important;
 }
 
 .table-actions {

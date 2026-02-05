@@ -9,6 +9,8 @@ let isClearing = false;
 let currentCols = [];
 let currentColumnCount = 0;
 
+let fillingDate = "";
+
 let tableData = {
   headings: [],
   data: []
@@ -120,6 +122,10 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function getDefaultDate() {
+  return fillingDate || todayISO();
+}
+
 /* ------------------ STATE SYNC ------------------ */
 
 function updatetableData() {
@@ -177,7 +183,7 @@ function handleChange() {
     tableInitialized = true;
 
     tableData.data = [
-      cols.map(col => (col.type === "date" ? todayISO() : ""))
+      cols.map(col => (col.type === "date" ? getDefaultDate() : ""))
     ];
 
     const container = document.getElementById("main");
@@ -255,7 +261,13 @@ function renderBody() {
       input.className = "form-control soft-input input-sm";
       input.value =
         row[colIndex] ??
-        (input.type === "date" ? todayISO() : "");
+        (input.type === "date" ? getDefaultDate() : "");
+
+      if (col.type === "date") {
+        input.addEventListener("change", (e) => {
+          fillingDate = e.target.value;
+        });
+      }
 
       td.appendChild(input);
       tr.appendChild(td);
@@ -337,7 +349,7 @@ function addButtonClick() {
   updatetableData();
 
   tableData.data.push(
-    currentCols.map(col => (col.type === "date" ? todayISO() : ""))
+    currentCols.map(col => (col.type === "date" ? getDefaultDate() : ""))
   );
 
   renderBody();
@@ -355,6 +367,7 @@ function removeRow(index) {
 
 function clearButtonClick() {
   isClearing = true;
+  fillingDate = "";
   tableData.data = [
     currentCols.map(col => (col.type === "date" ? todayISO() : ""))
   ];

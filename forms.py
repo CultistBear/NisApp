@@ -43,8 +43,18 @@ class Login(FlaskForm):
         logging.info("Login form initialized")
 
 class DataEntryForm(FlaskForm):
+    input_type = SelectField(
+        "Input Type",
+        choices=[
+            ('', 'Select'),
+            ("EARNINGS", "EARNINGS"),
+            ("PAYMENTS", "PAYMENTS")
+        ],
+        validators=[InputRequired(), AnyOf(["EARNINGS", "PAYMENTS"], message="Incorrect Input Type")]
+
+    )
     type = SelectField(
-        "Type",
+        "Location",
         choices=[
             ('', 'Select'),
             ("METRO", "METRO"),
@@ -61,9 +71,12 @@ class DataEntryForm(FlaskForm):
             ("CASH", "CASH"),
             ("PAYTM", "PAYTM"),
             ("HDFC BANK", "HDFC BANK"),
-            ("OTHER BANK", "OTHER BANK")
+            ("OTHER BANK", "OTHER BANK"),
+            ("CLAIMS", "CLAIMS"),
+            ("DISCOUNTS", "DISCOUNTS"),
+            ("BUDGET", "BUDGET")
         ],
-        validators=[InputRequired(), AnyOf(["CASH", "PAYTM", "HDFC BANK", "OTHER BANK"], message="Incorrect Subtype")]
+        validators=[InputRequired(), AnyOf(["CASH", "PAYTM", "HDFC BANK", "OTHER BANK", "CLAIMS", "DISCOUNTS", "BUDGET"], message="Incorrect Subtype")]
     )
 
     rowData = HiddenField("rowData", validators=[InputRequired()], id="rowData")

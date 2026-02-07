@@ -5,7 +5,7 @@ from itsdangerous import URLSafeSerializer
 from forms import SignUp, Login, DataEntryForm, UserEdit, UserFullEdit, FetchExcel, FetchTableData, SubmitData, DeleteRow
 from flask_wtf.csrf import CSRFProtect
 from db import get_db, close_db
-from constants import FLASK_SECRET_KEY, CURRENT_WORKING_DIRECTORY, COLUMN_MAP, SAFE_HEADERS, ADMIN_ENDPOINTS, DISPLAY_COLUMNS, ID_FERNET_KEY, IS_PRODUCTION, CLIENT_NAMES
+from constants import FLASK_SECRET_KEY, CURRENT_WORKING_DIRECTORY, COLUMN_MAP, SAFE_HEADERS, ADMIN_ENDPOINTS, DISPLAY_COLUMNS, ID_FERNET_KEY, IS_PRODUCTION, CLIENT_NAMES, INPUT_TYPE_SUBTYPES
 from datetime import datetime, timedelta
 from excelOrchestration import generate_excel
 import bcrypt
@@ -26,7 +26,7 @@ app.config.update(
     SESSION_COOKIE_SECURE=IS_PRODUCTION,
     PERMANENT_SESSION_LIFETIME=timedelta(days=15),
     WTF_CSRF_SSL_STRICT=IS_PRODUCTION,
-    WTF_CSRF_TIME_LIMIT=None
+    WTF_CSRF_TIME_LIMIT=10800
     )
 
 serializer = URLSafeSerializer(FLASK_SECRET_KEY)
@@ -182,46 +182,55 @@ def dataentry():
     form = DataEntryForm()
     db = get_db()
 
-    if form.validate_on_submit():
-        try:
-            formType = form.type.data
-            formSubtype = form.subtype.data
-            tableData = json.loads(form.rowData.data)
+    if form.is_submitted():
+        if form.validate_on_submit():
+            try:
+                forminput_type = form.input_type.data
+                formType = form.type.data
+                formSubtype = form.subtype.data
+                tableData = json.loads(form.rowData.data)
 
-            allowed_columns = COLUMN_MAP[formType][formSubtype]
-            validate_table_data(tableData, allowed_columns)
+                if forminput_type not in INPUT_TYPE_SUBTYPES or formSubtype not in INPUT_TYPE_SUBTYPES[forminput_type]:
+                    raise ValidationError(f"Invalid subtype '{formSubtype}' for input type '{forminput_type}'")
 
-            columns = [c["name"].lower() for c in allowed_columns]
-            idx = {sanitise_input(name): i for i, name in enumerate(columns)}
+                if formType not in COLUMN_MAP or formSubtype not in COLUMN_MAP[formType]:
+                    raise ValidationError(f"Invalid type/subtype combination: '{formType}'/'{formSubtype}'")
 
-            for row in tableData["data"]:
-                db.execute("""INSERT INTO Input(type, subtype, amount, receipts, date_for, submitted_by) VALUES (%s, %s, %s, %s, %s, %s)""",(formType, formSubtype, row[idx["amount"]], row[idx["receipts"]], row[idx["date"]], session["username"]))
+                allowed_columns = COLUMN_MAP[formType][formSubtype]
+                validate_table_data(tableData, allowed_columns)
 
-            db.commit() 
-            session["message"] = "Data submitted successfully"
+                columns = [c["name"].lower() for c in allowed_columns]
+                idx = {sanitise_input(name): i for i, name in enumerate(columns)}
+                for row in tableData["data"]:
+                    db.execute("""INSERT INTO Input(type, subtype, amount, receipts, date_for, submitted_by, input_type) VALUES (%s, %s, %s, %s, %s, %s, %s)""",(formType, formSubtype, row[idx["amount"]], row[idx["receipts"]], row[idx["date"]], session["username"], forminput_type))
 
-        except ValidationError as e:
-            db.rollback()
-            session["error"] = str(e)
+                db.commit() 
+                session["message"] = "Data submitted successfully"
 
-        except ValueError:
-            db.rollback()
-            session["error"] = "Invalid numeric or date value."
+            except ValidationError as e:
+                db.rollback()
+                session["error"] = str(e)
 
-        except Exception as e:
-            db.rollback()
-            err_msg = str(e).lower()
-            if "integrity" in err_msg or "constraint" in err_msg or "foreign key" in err_msg:
-                session["error"] = "Database constraint violation."
-            else:
-                logger.exception("Unexpected error")
-                session["error"] = "Unexpected error occurred."
+            except ValueError:
+                db.rollback()
+                session["error"] = "Invalid numeric or date value."
 
-        return redirect(url_for("dataentry"))
+            except Exception as e:
+                db.rollback()
+                err_msg = str(e).lower()
+                if "integrity" in err_msg or "constraint" in err_msg or "foreign key" in err_msg:
+                    session["error"] = "Database constraint violation."
+                else:
+                    logger.exception("Unexpected error")
+                    session["error"] = "Unexpected error occurred."
+            return redirect(url_for("dataentry"))
+        else:
+            session['error'] = [f"{field}: {err}" for field, field_errors in form.errors.items() for err in field_errors]
+            return redirect(url_for("dataentry"))
 
     error = session.pop("error", None)
     message = session.pop("message", None)
-    return render_template("dataentry.html", form=form, columns=COLUMN_MAP, error=error, message=message, client_names=CLIENT_NAMES)
+    return render_template("dataentry.html", form=form, columns=COLUMN_MAP, error=error, message=message, client_names=CLIENT_NAMES, input_type_subtypes=INPUT_TYPE_SUBTYPES)
     
 @app.route("/manageuser", methods = ["GET", "POST"])
 def manageuser():
@@ -365,11 +374,6 @@ def manageexcel():
     is_admin = session.get("admin") == 1
     user_type = session.get("user_name", "").upper() 
     
-    tableData = session.pop("tableData", None)
-    if tableData:
-        if not is_admin and user_type:
-            tableData = [row for row in tableData if row.get("type", "").upper() == user_type]
-        tableData = group_by_type_subtype(tableData)
     storedDate = session.pop("fetchingDate", datetime.today().date().isoformat())
     if storedDate:
         formDate.FetchingDate.data = storedDate
@@ -417,16 +421,6 @@ def fetchtable():
     form = FetchTableData()
     if form.validate():
         if is_valid_date(str(form.FetchingDate.data)):
-            db = get_db()
-            is_admin = session.get("admin") == 1
-            user_type = session.get("user_name", "").upper()
-            
-            if is_admin:
-                tableData = db.select("SELECT * FROM input WHERE date_for = %s", (form.FetchingDate.data,))
-            else:
-                tableData = db.select("SELECT * FROM input WHERE date_for = %s AND UPPER(type) = %s", (form.FetchingDate.data, user_type))
-            
-            session["tableData"] = tableData
             session["fetchingDate"] = form.FetchingDate.data.isoformat()
         else:
             session["error"] = "Invalid Date"

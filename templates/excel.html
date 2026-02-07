@@ -19,6 +19,7 @@
           <table id= "dataTable" class="table table-borderless align-middle mb-0 custom-table">
             <thead>
                 <tr>
+                    <th class="text-muted fw-semibold px-4 py-3">Input Type</th>
                     <th class="text-muted fw-semibold px-4 py-3">Type</th>
                     <th class="text-muted fw-semibold px-4 py-3">Subtype</th>
                     {% for key, label in columns %}
@@ -33,48 +34,48 @@
             </thead>
           
             <tbody>
-            {% for type, subtypes in tableData.items() %}
-                {% set ns = namespace(first_type_row=True) %}
-                {% set type_rowspan = subtypes.values() | map('length') | sum %}
-            
-                {% for subtype, rows in subtypes.items() %}
-                    {% for row in rows %}
-                    <tr>
-                        {# TYPE CELL #}
-                        {% if ns.first_type_row %}
-                            <td rowspan="{{ type_rowspan }}" class="soft-input input-sm">
-                                {{ type }}
-                            </td>
-                            {% set ns.first_type_row = False %}
-                        {% endif %}
-                          
-                        {# SUBTYPE CELL #}
-                        {% if loop.first %}
-                            <td rowspan="{{ rows|length }}" class="soft-input input-sm">
-                                {{ subtype }}
-                            </td>
-                        {% endif %}
-                        <input type="hidden" value={{row['id']}} id="row-id">
-                        {# DATA CELLS - editable only for admin #}
-                        {% for key, _ in columns %}
-                            <td class="soft-input input-sm {% if not is_admin %}readonly-cell{% endif %}" data-column="{{ key }}" {% if not is_admin %}data-readonly="true"{% endif %}>{{ row[key] }}</td>
-                        {% endfor %}
-                        {% if is_admin %}
-                        <td class="text-center align-middle">
-                          <form  method="POST" action="{{ url_for('deleterow') }}">
-                            {{ formDeleteRow.csrf_token }}
-                            {{formDeleteRow.rowID(value=row['id'])}}
-                            {{formDeleteRow.date}}
-                            {{formDeleteRow.DeleteRow(class_="btn btn-sm btn-danger")}}
-                          </form>
+            {% for row in tableData %}
+                <tr>
+                    {# INPUT TYPE CELL #}
+                    {% if row.input_type_rowspan %}
+                        <td rowspan="{{ row.input_type_rowspan }}" class="soft-input input-sm">
+                            {{ row.input_type }}
                         </td>
-                        {% endif %}
-                    </tr>
+                    {% endif %}
+                    
+                    {# TYPE CELL #}
+                    {% if row.type_rowspan %}
+                        <td rowspan="{{ row.type_rowspan }}" class="soft-input input-sm">
+                            {{ row.type }}
+                        </td>
+                    {% endif %}
+                      
+                    {# SUBTYPE CELL #}
+                    {% if row.subtype_rowspan %}
+                        <td rowspan="{{ row.subtype_rowspan }}" class="soft-input input-sm">
+                            {{ row.subtype }}
+                        </td>
+                    {% endif %}
+                    
+                    <input type="hidden" value="{{ row['id'] }}" id="row-id">
+                    {# DATA CELLS - editable only for admin #}
+                    {% for key, _ in columns %}
+                        <td class="soft-input input-sm {% if not is_admin %}readonly-cell{% endif %}" data-column="{{ key }}" {% if not is_admin %}data-readonly="true"{% endif %}>{{ row[key] }}</td>
                     {% endfor %}
-                {% endfor %}
+                    {% if is_admin %}
+                    <td class="text-center align-middle">
+                      <form  method="POST" action="{{ url_for('deleterow') }}">
+                        {{ formDeleteRow.csrf_token }}
+                        {{formDeleteRow.rowID(value=row['id'])}}
+                        {{formDeleteRow.date}}
+                        {{formDeleteRow.DeleteRow(class_="btn btn-sm btn-danger")}}
+                      </form>
+                    </td>
+                    {% endif %}
+                </tr>
             {% endfor %}
             <tr>
-              <td colspan="{{ (4 if is_admin else 3) + columns|length }}" class="text-center align-middle py-3">
+              <td colspan="{{ (5 if is_admin else 4) + columns|length }}" class="text-center align-middle py-3">
                 <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
                   {% if is_admin %}
                   <form method="POST" action="{{ url_for('submittable') }}" id="formSubmitTable">

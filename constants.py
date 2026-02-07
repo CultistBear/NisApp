@@ -56,6 +56,21 @@ COLUMN_MAP = {
             {"name": "Amount(₹)",  "type": "number"},
             {"name": "Receipts",  "type": "text"},
             {"name": "Date",  "type": "date"}
+        ],
+        "CLAIMS": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "DISCOUNTS": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "BUDGET": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
         ]
     },
     "OFFICE": {
@@ -75,6 +90,21 @@ COLUMN_MAP = {
             {"name": "Date",  "type": "date"}
         ],
         "OTHER BANK": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "CLAIMS": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "DISCOUNTS": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "BUDGET": [
             {"name": "Amount(₹)",  "type": "number"},
             {"name": "Receipts",  "type": "text"},
             {"name": "Date",  "type": "date"}
@@ -100,8 +130,28 @@ COLUMN_MAP = {
             {"name": "Amount(₹)",  "type": "number"},
             {"name": "Receipts",  "type": "text"},
             {"name": "Date",  "type": "date"}
+        ],
+        "CLAIMS": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "DISCOUNTS": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
+        ],
+        "BUDGET": [
+            {"name": "Amount(₹)",  "type": "number"},
+            {"name": "Receipts",  "type": "text"},
+            {"name": "Date",  "type": "date"}
         ]
     }
+}
+
+INPUT_TYPE_SUBTYPES = {
+    "EARNINGS": ["CASH", "PAYTM", "HDFC BANK", "OTHER BANK"],
+    "PAYMENTS": ["CLAIMS", "DISCOUNTS", "BUDGET"]
 }
 
 DISPLAY_COLUMNS = [

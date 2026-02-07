@@ -1,7 +1,17 @@
 const typeSelect = document.getElementById("type-select");
 const subtypeSelect = document.getElementById("subtype-select");
+const inputtypeSelect = document.getElementById("input_type-select");
+const subtypeContainer = document.getElementById("subtype-container");
 
-window.addEventListener("load", handleChange);
+const SUBTYPE_OPTIONS = {};
+for (const [inputType, subtypes] of Object.entries(inputTypeSubtypes)) {
+  SUBTYPE_OPTIONS[inputType] = subtypes.map(s => ({ value: s, label: s }));
+}
+
+window.addEventListener("load", () => {
+  handleInputTypeChange();
+  handleChange();
+});
 
 let tableInitialized = false;
 let isClearing = false;
@@ -162,7 +172,7 @@ function remapRowsByColumnName(oldCols, newCols, oldData) {
 /* ------------------ MAIN HANDLER ------------------ */
 
 function handleChange() {
-  if (!typeSelect.value || !subtypeSelect.value) return;
+  if (!typeSelect.value || !subtypeSelect.value || !inputtypeSelect.value) return;
 
   const cols = columns[typeSelect.value][subtypeSelect.value];
 
@@ -398,3 +408,29 @@ function makeButton(label, handler) {
 
 typeSelect.addEventListener("change", handleChange);
 subtypeSelect.addEventListener("change", handleChange);
+inputtypeSelect.addEventListener("change", handleInputTypeChange);
+
+function handleInputTypeChange() {
+  const inputType = inputtypeSelect.value;
+  
+  if (!inputType) {
+    subtypeContainer.style.display = "none";
+    subtypeSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+    subtypeSelect.value = "";
+    return;
+  }
+  
+  const options = SUBTYPE_OPTIONS[inputType] || [];
+  subtypeSelect.innerHTML = '<option value="" disabled selected>Select</option>';
+  
+  options.forEach(opt => {
+    const option = document.createElement("option");
+    option.value = opt.value;
+    option.textContent = opt.label;
+    subtypeSelect.appendChild(option);
+  });
+  
+  subtypeContainer.style.display = "block";
+  
+  handleChange();
+}

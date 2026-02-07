@@ -15,8 +15,10 @@ def is_valid_date(s):
 
 def group_by_type_subtype(rows):
     grouped = {}
+    cipher = Fernet(ID_FERNET_KEY)
 
     for r in rows:
+        it = r.get("input_type", "UNKNOWN")
         t = r["type"]
         st = r["subtype"]
 
@@ -36,22 +38,49 @@ def group_by_type_subtype(rows):
         for key in ("created_at", "updated_at"):
             if isinstance(row.get(key), datetime):
                 row[key] = row[key].strftime("%d %b %Y %H:%M")
-                
-        cipher = Fernet(ID_FERNET_KEY)
-        row["id"]=cipher.encrypt(str(row["id"]).encode()).decode()
 
-        grouped.setdefault(t, {}).setdefault(st, []).append(row)
+        row["id"] = cipher.encrypt(str(row["id"]).encode()).decode()
 
-    return grouped
+        grouped.setdefault(it, {}).setdefault(t, {}).setdefault(st, []).append(row)
+
+    flat_rows = []
+    for input_type, types in grouped.items():
+        it_rowspan = sum(
+            len(rows) for subtypes in types.values() for rows in subtypes.values()
+        )
+        first_it = True
+
+        for type_name, subtypes in types.items():
+            t_rowspan = sum(len(rows) for rows in subtypes.values())
+            first_t = True
+
+            for subtype_name, rows in subtypes.items():
+                st_rowspan = len(rows)
+                first_st = True
+
+                for row in rows:
+                    row["input_type"] = input_type
+                    row["type"] = type_name
+                    row["subtype"] = subtype_name
+                    row["input_type_rowspan"] = it_rowspan if first_it else None
+                    row["type_rowspan"] = t_rowspan if first_t else None
+                    row["subtype_rowspan"] = st_rowspan if first_st else None
+                    flat_rows.append(row)
+                    first_it = False
+                    first_t = False
+                    first_st = False
+
+    return flat_rows
 
 def build_db_data(rows):
     data = {}
 
     for r in rows:
         t = r["type"]
+        it = r.get("input_type", "UNKNOWN")
         st = r["subtype"]
 
-        data.setdefault(t, {}).setdefault(st, []).append([
+        data.setdefault(t, {}).setdefault(it, {}).setdefault(st, []).append([
             r["amount"],
             r["receipts"],
         ])

@@ -13,12 +13,30 @@
             class="mt-5" id="dataentryform">
 
         {{ form.csrf_token }}
+        <!--INPUT TYPE-->
+        <div class="mb-4">
+          <label for="input_type-select"
+                 class="form-label fw-semibold text-heading">
+            Input Type
+          </label>
 
-        <!-- TYPE -->
+          <select name="{{ form.input_type.name }}"
+                  id="input_type-select"
+                  class="form-control soft-input"
+                  required>
+            {% for value, label in form.input_type.choices %}
+              <option value="{{ value }}"
+                      {% if value == "" %}disabled selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <!-- LOCATION -->
         <div class="mb-4">
           <label for="type-select"
                  class="form-label fw-semibold text-heading">
-            Type
+            Location
           </label>
 
           <select name="{{ form.type.name }}"
@@ -35,7 +53,7 @@
         </div>
 
         <!-- SUBTYPE -->
-        <div class="mb-4">
+        <div class="mb-4" id="subtype-container" style="display: none;">
           <label for="subtype-select"
                  class="form-label fw-semibold text-heading">
             SubType
@@ -45,12 +63,7 @@
                   id="subtype-select"
                   class="form-control soft-input"
                   required>
-            {% for value, label in form.subtype.choices %}
-              <option value="{{ value }}"
-                      {% if value == "" %}disabled selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
+            <option value="" disabled selected>Select</option>
           </select>
         </div>
 
@@ -88,6 +101,7 @@
 <script>
   const columns = {{ columns | tojson | safe }};
   const clientNames = {{ client_names | tojson | safe }};
+  const inputTypeSubtypes = {{ input_type_subtypes | tojson | safe }};
 </script>
 
 <script src="{{ url_for('static', filename='js/dataentry.js') }}"></script>
